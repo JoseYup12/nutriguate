@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import logoSrc from "@/assets/logo.png";
 
-/* Elimina el fondo blanco del logo usando canvas */
+/* Elimina SOLO el fondo blanco puro — respeta colores claros como la nutria */
 function useTransparentLogo(src: string) {
   const [dataUrl, setDataUrl] = useState<string>(src);
 
@@ -15,27 +15,22 @@ function useTransparentLogo(src: string) {
       const ctx = canvas.getContext("2d")!;
       ctx.drawImage(img, 0, 0);
 
-      const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const out   = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imageData.data;
 
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i], g = data[i + 1], b = data[i + 2];
-        // Luminosidad del píxel (0-765)
-        const lum = r + g + b;
-        // Saturación (diferencia entre canal más alto y más bajo)
-        const sat = Math.max(r, g, b) - Math.min(r, g, b);
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i + 1], b = d[i + 2];
 
-        if (lum > 690 && sat < 25) {
-          // Blanco puro → completamente transparente
-          out.data[i + 3] = 0;
-        } else if (lum > 645 && sat < 40) {
-          // Casi blanco → semi-transparente según luminosidad
-          out.data[i + 3] = Math.round(255 * (1 - (lum - 645) / 100));
+        // Solo eliminar píxeles REALMENTE blancos (los tres canales > 248)
+        if (r > 248 && g > 248 && b > 248) {
+          // Transición suave: 248-255 → de opaco a transparente
+          const whiteness = Math.min(r, g, b);
+          d[i + 3] = Math.round(255 * (1 - (whiteness - 248) / 7));
         }
-        // Colores con saturación → se quedan opacos
+        // Todo lo demás (verde claro de la nutria, celeste, verde lima) queda opaco
       }
 
-      ctx.putImageData(out, 0, 0);
+      ctx.putImageData(imageData, 0, 0);
       setDataUrl(canvas.toDataURL("image/png"));
     };
     img.src = src;
@@ -45,7 +40,7 @@ function useTransparentLogo(src: string) {
 }
 
 export const Logo = ({ size = "md" }: { size?: "sm" | "md" | "lg" | "xl" }) => {
-  const heights = { sm: 38, md: 52, lg: 72, xl: 100 } as const;
+  const heights = { sm: 48, md: 72, lg: 96, xl: 128 } as const;
   const processedSrc = useTransparentLogo(logoSrc);
 
   return (
