@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import logoSrc from "@/assets/logo.png";
 
-/* Elimina SOLO el fondo blanco puro — respeta colores claros como la nutria */
 function useTransparentLogo(src: string) {
   const [dataUrl, setDataUrl] = useState<string>(src);
 
@@ -9,29 +8,50 @@ function useTransparentLogo(src: string) {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
+      const W = img.naturalWidth, H = img.naturalHeight;
       const canvas = document.createElement("canvas");
-      canvas.width  = img.naturalWidth;
-      canvas.height = img.naturalHeight;
+      canvas.width = W; canvas.height = H;
       const ctx = canvas.getContext("2d")!;
       ctx.drawImage(img, 0, 0);
 
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const d = imageData.data;
+      const id = ctx.getImageData(0, 0, W, H);
+      const d = id.data;
 
+      // Paso 1: solo eliminar blanco puro
       for (let i = 0; i < d.length; i += 4) {
         const r = d[i], g = d[i + 1], b = d[i + 2];
-
-        // Solo eliminar píxeles REALMENTE blancos (los tres canales > 248)
         if (r > 248 && g > 248 && b > 248) {
-          // Transición suave: 248-255 → de opaco a transparente
-          const whiteness = Math.min(r, g, b);
-          d[i + 3] = Math.round(255 * (1 - (whiteness - 248) / 7));
+          d[i + 3] = Math.round(255 * (1 - (Math.min(r, g, b) - 248) / 7));
         }
-        // Todo lo demás (verde claro de la nutria, celeste, verde lima) queda opaco
+      }
+      ctx.putImageData(id, 0, 0);
+
+      // Paso 2: auto-recorte al contenido real (elimina márgenes vacíos)
+      const cd = ctx.getImageData(0, 0, W, H).data;
+      let minX = W, minY = H, maxX = 0, maxY = 0;
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          if (cd[(y * W + x) * 4 + 3] > 10) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
       }
 
-      ctx.putImageData(imageData, 0, 0);
-      setDataUrl(canvas.toDataURL("image/png"));
+      const pad = 30;
+      minX = Math.max(0, minX - pad);
+      minY = Math.max(0, minY - pad);
+      maxX = Math.min(W, maxX + pad);
+      maxY = Math.min(H, maxY + pad);
+
+      const cw = maxX - minX, ch = maxY - minY;
+      const out = document.createElement("canvas");
+      out.width = cw; out.height = ch;
+      out.getContext("2d")!.drawImage(canvas, minX, minY, cw, ch, 0, 0, cw, ch);
+
+      setDataUrl(out.toDataURL("image/png"));
     };
     img.src = src;
   }, [src]);
