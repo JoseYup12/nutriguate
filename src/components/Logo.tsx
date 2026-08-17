@@ -60,7 +60,7 @@ function useTransparentLogo(src: string) {
 }
 
 export const Logo = ({ size = "md" }: { size?: "sm" | "md" | "lg" | "xl" }) => {
-  const heights = { sm: 120, md: 300, lg: 380, xl: 480 } as const;
+  const heights = { sm: 38, md: 52, lg: 74, xl: 100 } as const;
   const processedSrc = useTransparentLogo(logoSrc);
 
   return (
