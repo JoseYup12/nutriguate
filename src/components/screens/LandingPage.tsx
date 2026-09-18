@@ -1,16 +1,13 @@
-import { useState, useRef, useEffect } from "react";
-import heroImg   from "@/assets/hero-person.jpg";
-import marketImg from "@/assets/market-flatlay.jpg";
+import { useState } from "react";
+import heroImg    from "@/assets/hero-person.jpg";
+import marketImg  from "@/assets/market-flatlay.jpg";
 import marketScene from "@/assets/market-scene.jpg";
-import mealPlate from "@/assets/meal-plate.jpg";
+import mealPlate  from "@/assets/meal-plate.jpg";
 import fitnessMan from "@/assets/fitness-man.jpg";
 import t1 from "@/assets/testimonial-1.jpg";
 import t2 from "@/assets/testimonial-2.jpg";
 import t3 from "@/assets/testimonial-3.jpg";
 import { Logo } from "@/components/Logo";
-
-/* ── Duración simulada cuando no hay video real ── */
-const DEMO_DURATION_MS = 12_000; // 12 s; ajustar al agregar un video real
 
 /* ── Datos estáticos ── */
 const frustraciones = [
@@ -22,36 +19,52 @@ const frustraciones = [
 ];
 
 const pasos = [
-  { n: "01", t: "Analizamos tu caso", d: "Datos reales: peso, talla, actividad, historial y objetivo. El sistema clasifica tu caso en segundos." },
+  { n: "01", t: "Analizamos tu caso",      d: "Datos reales: peso, talla, actividad, historial y objetivo. El sistema clasifica tu caso en segundos." },
   { n: "02", t: "Definimos tu estrategia", d: "El sistema determina el enfoque exacto: calorías, macros, tipo de alimentación y actividad física." },
-  { n: "03", t: "Te damos un plan completo", d: "Nutrición día a día + actividad adaptada + lista de supermercado con precios guatemaltecos." },
+  { n: "03", t: "Te damos un plan completo",d: "Nutrición día a día + actividad adaptada + lista de supermercado con precios guatemaltecos." },
   { n: "04", t: "Ajustamos según tu progreso", d: "Cada 14 días registras tu avance y el sistema actualiza calorías, estructura y actividad." },
 ];
 
 const testimonios = [
-  { img: t1, nombre: "María R.", edad: 34, situacion: "Probé varias dietas. Comía poco, entrenaba y no cambiaba.", texto: "El sistema me mostró que estaba comiendo mucho menos proteína de la que necesitaba para mi peso. Con el ajuste correcto empecé a ver cambios en mi energía desde la primera semana. Por fin entendí por qué lo que hacía antes no funcionaba.", resultado: "Entendió qué fallaba", caso: "Pérdida de grasa" },
-  { img: t2, nombre: "Andrés P.", edad: 29, situacion: "Entrenaba 4 veces por semana pero no veía cambios en composición.", texto: "Descubrí que estaba comiendo los carbohidratos en el momento equivocado y que mi ingesta de proteína era insuficiente para lo que entrenaba. Cuando el plan alineó la alimentación con mi actividad, en 3 semanas noté diferencia real en el espejo.", resultado: "Composición mejoró", caso: "Con actividad física" },
-  { img: t3, nombre: "Claudia M.", edad: 41, situacion: "Quería mejorar su alimentación pero con presupuesto limitado.", texto: "Lo que más me ayudó fue descubrir que el problema no era el dinero sino las elecciones. Estaba gastando en cosas que no me nutrían. Con la lista de compras del sistema y precios comparados, comencé a comer mejor gastando igual o menos.", resultado: "Come mejor, gasta igual", caso: "Presupuesto ajustado" },
+  { img: t1, nombre: "María R.",   edad: 34, situacion: "Probé varias dietas. Comía poco, entrenaba y no cambiaba.",              texto: "El sistema me mostró que estaba comiendo mucho menos proteína de la que necesitaba para mi peso. Con el ajuste correcto empecé a ver cambios en mi energía desde la primera semana.",    resultado: "Entendió qué fallaba",    caso: "Pérdida de grasa" },
+  { img: t2, nombre: "Andrés P.",  edad: 29, situacion: "Entrenaba 4 veces por semana pero no veía cambios en composición.",       texto: "Descubrí que estaba comiendo los carbohidratos en el momento equivocado. Cuando el plan alineó la alimentación con mi actividad, en 3 semanas noté diferencia real en el espejo.",      resultado: "Composición mejoró",      caso: "Con actividad física" },
+  { img: t3, nombre: "Claudia M.", edad: 41, situacion: "Quería mejorar su alimentación pero con presupuesto limitado.",           texto: "Lo que más me ayudó fue descubrir que el problema no era el dinero sino las elecciones. Con la lista de compras del sistema, comencé a comer mejor gastando igual o menos.",           resultado: "Come mejor, gasta igual", caso: "Presupuesto ajustado" },
 ];
 
 const compTabla = [
-  ["Precio mensual", "Q99-199", "~Q85/mes", "~Q155/mes", "~Q93/mes", "~Q465/mes"],
-  ["Diagnóstico clínico", "✓ 7 perfiles", "Template", "Template", "Template", "Parcial"],
-  ["Alimentos guatemaltecos", "✓ 100%", "Parcial LATAM", "—", "—", "—"],
-  ["Lista compras con precios GT", "✓ La Torre, Walmart", "—", "—", "—", "—"],
-  ["Análisis con foto corporal", "✓ con IA", "—", "—", "—", "—"],
-  ["Ajuste automático", "✓ cada 14 días", "Manual", "Manual", "Semanal", "Semanal"],
-  ["Condiciones de salud", "✓ Adapta alimentos", "Básico", "Básico", "—", "Básico"],
-  ["Registro diario obligatorio", "No", "Sí", "Sí", "Sí", "Sí"],
-  ["Sin app que descargar", "✓ Web directa", "App", "App", "App", "App"],
+  ["Precio mensual",                "Q99-199",          "~Q85/mes",    "~Q155/mes", "~Q93/mes",   "~Q465/mes"],
+  ["Diagnóstico clínico",           "✓ 7 perfiles",     "Template",    "Template",  "Template",   "Parcial"],
+  ["Alimentos guatemaltecos",       "✓ 100%",           "Parcial LATAM","—",        "—",          "—"],
+  ["Lista compras con precios GT",  "✓ La Torre, Walmart","—",         "—",         "—",          "—"],
+  ["Análisis con foto corporal",    "✓ con IA",         "—",           "—",         "—",          "—"],
+  ["Ajuste automático",             "✓ cada 14 días",   "Manual",      "Manual",    "Semanal",    "Semanal"],
+  ["Condiciones de salud",          "✓ Adapta alimentos","Básico",     "Básico",    "—",          "Básico"],
+  ["Registro diario obligatorio",   "No",               "Sí",          "Sí",        "Sí",         "Sí"],
+  ["Sin app que descargar",         "✓ Web directa",    "App",         "App",       "App",        "App"],
 ];
 
 const faqItems: [string, string][] = [
-  ["¿Cuánto tiempo toma ver resultados?", "Los primeros cambios en energía y digestión suelen ocurrir en la primera semana. Cambios visibles en composición corporal típicamente entre la semana 3 y la semana 6, dependiendo del caso y la adherencia al plan."],
-  ["¿El plan cambia con el tiempo?", "Sí. Cada 14 días puedes registrar tu progreso y el sistema ajusta calorías, distribución de macros y actividad física según cómo estás respondiendo. No es un plan estático."],
+  ["¿Cuánto tiempo toma ver resultados?",          "Los primeros cambios en energía y digestión suelen ocurrir en la primera semana. Cambios visibles en composición corporal típicamente entre la semana 3 y la semana 6, dependiendo del caso y la adherencia al plan."],
+  ["¿El plan cambia con el tiempo?",               "Sí. Cada 14 días puedes registrar tu progreso y el sistema ajusta calorías, distribución de macros y actividad física según cómo estás respondiendo. No es un plan estático."],
   ["¿Es para principiantes o personas con experiencia?", "Para ambos. El sistema detecta tu nivel real y adapta todo — el tipo de alimentación, la estructura de las comidas y la prescripción de actividad física — según tu punto de partida."],
   ["¿Qué pasa si no sigo el plan perfectamente?", "Nada irreversible. El check-in de 14 días toma en cuenta tu adherencia real y ajusta el plan para que sea más sostenible. Un plan que se adapta a ti siempre será mejor que uno perfecto que no puedes seguir."],
-  ["¿Incluye ejercicio o solo alimentación?", "Los dos. Recibes un plan nutricional y una prescripción de actividad física adaptada a tu disponibilidad, contexto (casa, caminata o gimnasio) y nivel actual."],
+  ["¿Incluye ejercicio o solo alimentación?",      "Los dos. Recibes un plan nutricional y una prescripción de actividad física adaptada a tu disponibilidad, contexto (casa, caminata o gimnasio) y nivel actual."],
+];
+
+const stats = [
+  { v: "< 2 min", l: "Para obtener tu plan" },
+  { v: "7",       l: "Perfiles de diagnóstico" },
+  { v: "14 días", l: "Ciclo de ajuste adaptativo" },
+  { v: "100%",    l: "Alimentos guatemaltecos" },
+];
+
+const beneficios = [
+  { icon: "🎯", t: "Diagnóstico personalizado",    d: "El sistema analiza tu caso específico — no un template genérico. 7 perfiles clínicos distintos." },
+  { icon: "🥑", t: "Alimentos de tu mercado",      d: "Tortillas, frijoles, güisquil, incaparina. Precios reales de La Torre, Walmart y Despensa Familiar." },
+  { icon: "📊", t: "Plan con macros exactos",      d: "Calorías, proteína, carbohidratos y grasas calculados según tu cuerpo, objetivo y nivel de actividad." },
+  { icon: "🔄", t: "Se ajusta cada 14 días",       d: "Registrás tu avance y el sistema actualiza todo — sin reiniciar, sin nueva dieta, sin adivinar." },
+  { icon: "💪", t: "Incluye actividad física",     d: "Prescripción de ejercicio adaptada a tu disponibilidad: casa, caminata o gimnasio." },
+  { icon: "🛒", t: "Lista de supermercado",        d: "Lista de compras semanal con cantidades exactas y precios comparados de supermercados guatemaltecos." },
 ];
 
 function FAQ() {
@@ -74,111 +87,51 @@ function FAQ() {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   LandingPage — con VSL integrado como primera sección
+   LandingPage
    ════════════════════════════════════════════════════════════════════════════ */
 export const LandingPage = ({ onStart }: { onStart: () => void }) => {
-  /* ── Estado del video ── */
-  const [videoEnded, setVideoEnded] = useState(false);
-  const [isPlaying, setIsPlaying]   = useState(false);
-  const [progress, setProgress]     = useState(0);
-  const [isSticky, setIsSticky]     = useState(false);
 
-  const videoRef     = useRef<HTMLVideoElement>(null);
-  const videoCardRef = useRef<HTMLDivElement>(null);
-  const demoTimer    = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  /* ── IntersectionObserver para PiP sticky ── */
-  useEffect(() => {
-    const card = videoCardRef.current;
-    if (!card) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsSticky(!entry.isIntersecting),
-      { threshold: 0.15 },
-    );
-    observer.observe(card);
-    return () => observer.disconnect();
-  }, []);
-
-  /* ── Limpiar timer al desmontar ── */
-  useEffect(() => () => { if (demoTimer.current) clearInterval(demoTimer.current); }, []);
-
-  /* ── Iniciar reproducción (real o demo simulado) ── */
-  const handlePlayClick = () => {
-    const vid = videoRef.current;
-    if (vid && vid.currentSrc) {
-      vid.play();
-    } else {
-      setIsPlaying(true);
-      setProgress(0);
-      const start = Date.now();
-      demoTimer.current = setInterval(() => {
-        const pct = Math.min(100, ((Date.now() - start) / DEMO_DURATION_MS) * 100);
-        setProgress(pct);
-        if (pct >= 100) {
-          clearInterval(demoTimer.current!);
-          demoTimer.current = null;
-          setIsPlaying(false);
-          setVideoEnded(true);
-          setProgress(100);
-        }
-      }, 80);
-    }
-  };
-
-  const scrollToVideo = () =>
-    videoCardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-
-  /* ── CTA bloqueado hasta que termine el video ── */
   const CTAButton = ({ className = "", size = "base" }: { className?: string; size?: "base" | "lg" }) => (
     <div className={className}>
       <button
-        onClick={videoEnded ? onStart : undefined}
-        disabled={!videoEnded}
-        aria-disabled={!videoEnded}
+        onClick={onStart}
         className={[
-          "w-full rounded-xl font-extrabold transition-all duration-300",
+          "w-full rounded-xl font-extrabold transition-all duration-300 cta-primary",
           size === "lg" ? "py-5 text-lg" : "py-4 text-base",
-          videoEnded
-            ? "cta-primary"
-            : "bg-surface border-2 border-lima/10 text-foreground/30 cursor-not-allowed select-none",
         ].join(" ")}
       >
-        {videoEnded
-          ? "Descubrir qué necesita mi cuerpo — Gratis →"
-          : "🔒 Mirá el video para continuar"}
+        Realizar mi Plan Nutricional →
       </button>
-      {!videoEnded ? (
-        <p className="text-center text-[11px] text-foreground/35 mt-2">
-          El botón se habilita cuando termines de ver el video
-        </p>
-      ) : (
-        <p className="text-center text-xs text-foreground/45 mt-3">
-          Sin tarjeta · Sin registro · Resultado en menos de 2 minutos
-        </p>
-      )}
+      <p className="text-center text-xs text-foreground/45 mt-3">
+        Gratis · Sin tarjeta · Resultado en menos de 2 minutos
+      </p>
     </div>
   );
 
-  /* ════════════════════ RENDER ════════════════════ */
   return (
     <div className="bg-background text-foreground">
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-lima/10 px-6 py-5 flex items-center justify-center">
+      <header className="sticky top-0 z-30 bg-background/90 backdrop-blur-md border-b border-lima/10 px-6 py-3 flex items-center justify-between gap-4">
         <Logo size="md" />
+        <button
+          onClick={onStart}
+          className="cta-primary text-sm font-bold py-2.5 px-5 rounded-xl whitespace-nowrap"
+        >
+          Iniciar sesión →
+        </button>
       </header>
 
       {/* ══════════════════════════════════════════════════════════
-          HERO — Headline + Video VSL (primera sección)
+          HERO
           ══════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden">
-        {/* Fondo con foto tenue */}
         <div className="absolute inset-0 pointer-events-none">
           <img src={heroImg} alt="" className="w-full h-full object-cover opacity-20" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/90 to-background" />
         </div>
 
-        <div className="relative max-w-4xl mx-auto px-6 pt-16 pb-10">
+        <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-20">
           {/* Badge */}
           <div className="flex justify-center mb-6 anim-fade-up">
             <div className="inline-flex items-center gap-2 bg-lima/10 border border-lima/30 rounded-full px-4 py-1.5 backdrop-blur">
@@ -190,7 +143,7 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
           </div>
 
           {/* Headline */}
-          <div className="text-center mb-8 anim-fade-up">
+          <div className="text-center mb-10 anim-fade-up">
             <h1 className="font-display text-balance text-[clamp(2.4rem,7vw,4.8rem)] font-normal leading-[1.0] mb-5">
               Deja de adivinar qué hacer<br />
               <span className="text-lima">para cambiar tu cuerpo</span>
@@ -201,101 +154,41 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
             </p>
           </div>
 
-          {/* ══════ REPRODUCTOR DE VIDEO ══════ */}
-          <div ref={videoCardRef} className="glass-card overflow-hidden mb-6 anim-fade-up">
-
-            {/* Player */}
-            <div className="relative aspect-video bg-background overflow-hidden">
-              {/* Poster */}
-              <img
-                src={mealPlate}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
-              />
-              <div className="absolute inset-0 bg-gradient-to-br from-background/50 to-background/75 pointer-events-none" />
-
-              {/* Elemento <video> real — descomenta src cuando tengas el video */}
-              <video
-                ref={videoRef}
-                className="absolute inset-0 w-full h-full object-cover"
-                poster={mealPlate}
-                // src="/video/nutriguate-vsl.mp4"
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-                onEnded={() => { setVideoEnded(true); setIsPlaying(false); setProgress(100); }}
-                onTimeUpdate={() => {
-                  const v = videoRef.current;
-                  if (v?.duration) setProgress((v.currentTime / v.duration) * 100);
-                }}
-              />
-
-              {/* Overlay play / completado */}
-              {!isPlaying && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4">
-                  {!videoEnded ? (
-                    <>
-                      <button
-                        onClick={handlePlayClick}
-                        className="w-24 h-24 rounded-full bg-lima/20 border-2 border-lima/60 flex items-center justify-center hover:scale-110 hover:bg-lima/30 transition-all backdrop-blur-sm"
-                        aria-label="Reproducir video"
-                      >
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="hsl(var(--lima))">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </button>
-                      <div className="text-center px-4">
-                        <p className="font-bold text-lg mb-1">Mirá cómo funciona NutriGuate</p>
-                        <p className="text-sm text-foreground/60">2 minutos · Cambiará cómo ves tu nutrición</p>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-center">
-                      <div className="w-16 h-16 rounded-full bg-lima/20 border-2 border-lima flex items-center justify-center mx-auto mb-4">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                          stroke="hsl(var(--lima))" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </div>
-                      <div className="font-display text-3xl text-lima mb-2">¡Video completado!</div>
-                      <p className="text-foreground/70 text-sm">El botón de abajo ya está habilitado.</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Indicador REPRODUCIENDO */}
-              {isPlaying && (
-                <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-background/75 backdrop-blur rounded-full px-3 py-1.5">
-                  <span className="w-2 h-2 rounded-full bg-crimson anim-pulse-soft" />
-                  <span className="text-[10px] font-bold tracking-widest text-foreground/80 uppercase">
-                    Reproduciendo
-                  </span>
-                </div>
-              )}
-
-              {/* Barra de progreso */}
-              <div className="absolute bottom-0 left-0 right-0 z-10 h-1.5 bg-surface/40">
-                <div
-                  className="h-full bg-gradient-to-r from-lima to-celeste transition-all duration-200"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-
-            {/* CTA bajo el video */}
-            <div className="p-5 border-t border-lima/8">
-              <CTAButton />
-            </div>
+          {/* CTA principal */}
+          <div className="max-w-md mx-auto mb-14 anim-fade-up">
+            <CTAButton size="lg" />
           </div>
 
-          {/* Bullets de confianza */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 max-w-2xl mx-auto">
-            {["Análisis basado en datos reales", "Alimentos guatemaltecos", "Ajuste continuo cada 14 días", "Listo en menos de 2 minutos"].map(t => (
-              <div key={t} className="flex items-center gap-2 text-sm text-foreground/65">
-                <span className="w-1 h-1 rounded-full bg-lima flex-shrink-0" />
-                <span>{t}</span>
+          {/* Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 anim-fade-up">
+            {stats.map(({ v, l }) => (
+              <div key={l} className="glass-card p-5 text-center">
+                <div className="font-display text-2xl text-lima mb-1">{v}</div>
+                <div className="text-xs text-foreground/55 leading-tight">{l}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════ BENEFICIOS ══════════ */}
+      <section className="bg-surface py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="eyebrow mb-3">Qué incluye</p>
+            <h2 className="font-display text-[clamp(2rem,4.5vw,3rem)]">Todo lo que necesitás en un solo lugar</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {beneficios.map(({ icon, t, d }) => (
+              <div key={t} className="bg-card-ng border border-lima/10 rounded-2xl p-7 hover:border-lima/40 hover:-translate-y-1 transition-all">
+                <div className="text-4xl mb-4">{icon}</div>
+                <div className="font-bold text-lima mb-2 text-base">{t}</div>
+                <div className="text-sm text-foreground/65 leading-relaxed">{d}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-12 max-w-md mx-auto">
+            <CTAButton />
           </div>
         </div>
       </section>
@@ -365,9 +258,12 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
           <h2 className="font-display text-[clamp(2.2rem,5.5vw,3.8rem)] mb-6 leading-[1.05]">
             Tortillas, frijoles, güisquil, <span className="text-lima">incaparina</span>.
           </h2>
-          <p className="text-foreground/80 text-lg leading-relaxed">
+          <p className="text-foreground/80 text-lg leading-relaxed mb-8">
             Alimentos reales de tu mercado, con precios reales de La Torre, Walmart y Despensa Familiar. No es un plan importado: es un sistema diseñado para tu realidad.
           </p>
+          <button onClick={onStart} className="cta-primary font-bold py-3.5 px-8 rounded-xl text-base">
+            Realizar mi Plan →
+          </button>
         </div>
       </section>
 
@@ -408,28 +304,28 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
                   {
                     icon: "🌅", n: "Desayuno", h: "7:00 am", total: "445 kcal",
                     items: [
-                      ["🥚", "2 huevos revueltos", "200 kcal"],
-                      ["🌽", "2 tortillas de maíz (60g)", "130 kcal"],
-                      ["🫘", "½ taza frijoles negros (120g)", "110 kcal"],
-                      ["☕", "Café negro sin azúcar", "5 kcal"],
+                      ["🥚","2 huevos revueltos","200 kcal"],
+                      ["🌽","2 tortillas de maíz (60g)","130 kcal"],
+                      ["🫘","½ taza frijoles negros (120g)","110 kcal"],
+                      ["☕","Café negro sin azúcar","5 kcal"],
                     ],
                   },
                   {
                     icon: "☀️", n: "Almuerzo", h: "12:30 pm", total: "441 kcal",
                     items: [
-                      ["🍗", "Pechuga de pollo (150g)", "248 kcal"],
-                      ["🌽", "Arroz blanco (½ taza, 100g)", "130 kcal"],
-                      ["🥦", "Güisquil cocido (150g)", "38 kcal"],
-                      ["🍅", "Ensalada: tomate + cebolla", "25 kcal"],
+                      ["🍗","Pechuga de pollo (150g)","248 kcal"],
+                      ["🌽","Arroz blanco (½ taza, 100g)","130 kcal"],
+                      ["🥦","Güisquil cocido (150g)","38 kcal"],
+                      ["🍅","Ensalada: tomate + cebolla","25 kcal"],
                     ],
                   },
                   {
                     icon: "🌙", n: "Cena", h: "7:00 pm", total: "301 kcal",
                     items: [
-                      ["🥚", "3 claras de huevo revueltas", "51 kcal"],
-                      ["🫘", "¾ taza frijoles (180g)", "165 kcal"],
-                      ["🌽", "1 tortilla (30g)", "65 kcal"],
-                      ["🌿", "Chipilín salteado (50g)", "20 kcal"],
+                      ["🥚","3 claras de huevo revueltas","51 kcal"],
+                      ["🫘","¾ taza frijoles (180g)","165 kcal"],
+                      ["🌽","1 tortilla (30g)","65 kcal"],
+                      ["🌿","Chipilín salteado (50g)","20 kcal"],
                     ],
                   },
                 ].map((c) => (
@@ -465,6 +361,10 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
                   <span>Alimentos disponibles en cualquier mercado guatemalteco</span>
                 </div>
                 <div className="text-lima font-bold">+ Refacción incluida en tu plan real</div>
+              </div>
+
+              <div className="mt-8">
+                <CTAButton />
               </div>
             </div>
           </div>
@@ -514,7 +414,7 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="bg-lima">
-                  {["Característica", "NutriGuate", "Fitia", "MyFitnessPal", "MacroFactor", "Noom"].map((h) => (
+                  {["Característica","NutriGuate","Fitia","MyFitnessPal","MacroFactor","Noom"].map((h) => (
                     <th key={h} className="text-left px-4 py-4 text-xs font-black uppercase tracking-wider text-background whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -591,86 +491,17 @@ export const LandingPage = ({ onStart }: { onStart: () => void }) => {
         </div>
       </section>
 
+      {/* ── Footer ── */}
       <footer className="bg-background border-t border-lima/10 px-6 py-10 text-center">
-        <Logo size="sm" />
-        <p className="text-xs text-foreground/40 mt-4">NutriGuate © 2026 · Sistema inteligente de orientación nutricional · Guatemala 🇬🇹</p>
+        <div className="flex justify-center mb-4">
+          <Logo size="sm" />
+        </div>
+        <p className="text-xs text-foreground/40 mt-2">NutriGuate © 2026 · Sistema inteligente de orientación nutricional · Guatemala 🇬🇹</p>
         <p className="text-[11px] text-foreground/30 mt-3 max-w-2xl mx-auto leading-relaxed">
           NutriGuate es una herramienta de orientación nutricional basada en inteligencia artificial. No reemplaza la consulta, diagnóstico ni tratamiento de un profesional de salud o nutricionista certificado. Si tenés condiciones médicas, consultá a tu médico antes de realizar cambios en tu alimentación o actividad física.
         </p>
       </footer>
 
-      {/* ══════════ STICKY PiP — aparece al hacer scroll ══════════ */}
-      {isSticky && (
-        <div
-          className="fixed bottom-6 right-6 z-50 w-72 rounded-2xl overflow-hidden shadow-2xl border border-lima/25"
-          style={{ background: "hsl(var(--surface))", backdropFilter: "blur(16px)" }}
-        >
-          <div className="relative h-40 overflow-hidden">
-            <img src={mealPlate} alt="" className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-b from-background/60 to-background/85 flex flex-col items-center justify-center gap-2 p-4">
-              {videoEnded ? (
-                <>
-                  <div className="w-11 h-11 rounded-full bg-lima/20 border border-lima flex items-center justify-center">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-                      stroke="hsl(var(--lima))" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </div>
-                  <p className="text-lima font-bold text-sm">Video completado</p>
-                  <button
-                    onClick={onStart}
-                    className="mt-1 cta-primary text-xs py-2 px-4 rounded-lg w-full"
-                  >
-                    Continuar →
-                  </button>
-                </>
-              ) : isPlaying ? (
-                <>
-                  <div className="w-11 h-11 rounded-full border-[3px] border-lima/20 border-t-lima anim-spin-slow" />
-                  <p className="text-foreground/70 text-sm font-semibold">Reproduciéndose…</p>
-                  <p className="text-foreground/40 text-xs text-center">Subí a ver el video completo</p>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={handlePlayClick}
-                    className="w-11 h-11 rounded-full bg-lima/20 border border-lima/60 flex items-center justify-center hover:scale-110 transition-transform"
-                    aria-label="Reproducir"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="hsl(var(--lima))">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </button>
-                  <p className="text-foreground/60 text-sm">Video en pausa</p>
-                  <p className="text-foreground/40 text-xs text-center">Mirá el video para continuar</p>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="h-1 bg-background/40">
-            <div
-              className="h-full bg-gradient-to-r from-lima to-celeste transition-all duration-200"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-
-          <div className="px-4 py-3 flex items-center justify-between border-t border-lima/10">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/40">
-              {videoEnded ? "✓ Listo para continuar" : "📹 NutriGuate VSL"}
-            </span>
-            <button
-              onClick={scrollToVideo}
-              className="text-xs font-bold text-lima hover:text-lima/70 transition-colors flex items-center gap-1"
-            >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="18 15 12 9 6 15" />
-              </svg>
-              Ver arriba
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
